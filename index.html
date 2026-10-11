@@ -375,7 +375,7 @@
       const port = window.location.port || '';
       if ((host === 'localhost' || host === '127.0.0.1') && port === '6039') return '';
       if (proto === 'file:' || host === 'localhost' || host === '127.0.0.1' || !host) return 'http://localhost:6039';
-      if (host.includes('capzone.top') || host.includes('web.app')) return 'https://capzone.kaveez.top';
+      if (host.includes('capzone.top') || host.includes('web.app') || host.includes('firebaseapp.com')) return 'https://capzone.kaveez.top';
       return '';
     })();
 
@@ -423,10 +423,11 @@
       const text = document.getElementById('serverStatusText');
       const banner = document.getElementById('serverAlertBanner');
       const urlText = document.getElementById('currentApiUrlText');
-      if (urlText) urlText.textContent = 'Backend Service';
+      if (urlText) urlText.textContent = API_BASE_URL || 'Backend Service';
 
       try {
-        const res = await fetch(`/api/status?_t=${Date.now()}`);
+        let res = await fetch(`${API_BASE_URL}/api/status?_t=${Date.now()}`);
+        if (!res.ok && API_BASE_URL) res = await fetch(`/api/status?_t=${Date.now()}`);
         if (res.ok) {
           if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
           if (text) {
@@ -486,11 +487,20 @@
       
       let users = null;
       try {
-        const res = await fetch(`/api/admin/srt-users?_t=${Date.now()}`);
+        let res = await fetch(`${API_BASE_URL}/api/admin/srt-users?_t=${Date.now()}`);
+        if (!res.ok && API_BASE_URL) {
+          res = await fetch(`/api/admin/srt-users?_t=${Date.now()}`);
+        }
         if (res.ok) {
           users = await res.json();
         }
-      } catch (err) {}
+      } catch (err) {
+        try {
+          const fallback = API_BASE_URL.includes('localhost') ? 'https://capzone.kaveez.top' : 'http://localhost:6039';
+          const res2 = await fetch(`${fallback}/api/admin/srt-users?_t=${Date.now()}`);
+          if (res2.ok) users = await res2.json();
+        } catch(e2) {}
+      }
 
       if (users && Array.isArray(users)) {
         allUsers = users;
@@ -910,14 +920,17 @@
         const bc = new BroadcastChannel('capzone_realtime_sync');
         bc.onmessage = (event) => {
           if (event.data && (event.data.type === 'USER_UPDATED' || event.data.type === 'PAYMENT_COMPLETED')) {
-            showToast(`⚡ Payment Update: ${event.data.email || 'User'} credited (Rs. ${event.data.amount || ''})`, 'success');
+            const toastMsg = event.data.type === 'PAYMENT_COMPLETED' 
+              ? `⚡ Payment Update: ${event.data.email || 'User'} credited (Rs. ${event.data.amount || ''})`
+              : `⚡ User Synced: ${event.data.email || 'User'} logged in / updated`;
+            showToast(toastMsg, 'success');
             fetchUsers();
           }
         };
       } catch (e) {}
 
       window.addEventListener('storage', (e) => {
-        if (e.key === 'capzone_admin_sync' || e.key === 'capzone_payment_sync' || e.key === 'capzone_balance_update') {
+        if (e.key === 'capzone_admin_sync' || e.key === 'capzone_payment_sync' || e.key === 'capzone_balance_update' || e.key === 'capzone_user_email' || e.key === 'capzone_user_profile') {
           fetchUsers();
         }
       });
