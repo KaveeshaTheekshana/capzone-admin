@@ -384,19 +384,25 @@
       return '';
     })();
 
-    // Direct API Post
+    // Direct API Post with automatic fallbacks
     async function apiPost(endpoint, payload) {
-      try {
-        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-          return await res.json();
-        }
-      } catch (e) {
-        console.warn('API Post notice:', e.message);
+      const candidates = [
+        `${API_BASE_URL}${endpoint}`,
+        endpoint,
+        `http://localhost:6039${endpoint}`,
+        `https://capzone.kaveez.top${endpoint}`
+      ];
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (e) {}
       }
       return null;
     }
