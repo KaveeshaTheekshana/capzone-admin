@@ -80,26 +80,17 @@
       </div>
     </div>
     
-    <div class="flex items-center flex-wrap gap-2.5">
-      <!-- Live Server Status Indicator -->
-      <div id="serverStatusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 bg-slate-800/80 border border-slate-700 text-slate-300">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="serverStatusDot"></span>
-        <span id="serverStatusText">Connecting...</span>
+    <div class="flex items-center gap-3">
+      <!-- Wallet Total Revenue Card in Header -->
+      <div class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500/15 via-[#1a2030] to-amber-500/10 border border-amber-500/30 shadow-md flex items-center gap-2.5">
+        <div class="p-1.5 bg-amber-500/20 text-amber-400 rounded-lg">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Wallet:</span>
+          <span class="text-sm sm:text-base font-black text-amber-400">Rs. <span id="headerTotalEarnings">0.00</span></span>
+        </div>
       </div>
-
-      <!-- Add User Button -->
-      <button onclick="openCreateUserModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 flex items-center gap-1.5 transition-all transform active:scale-95">
-        <i data-lucide="user-plus" class="w-4 h-4"></i> Add User
-      </button>
-
-      <!-- Refresh Button -->
-      <button onclick="fetchUsers()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all transform active:scale-95">
-        <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i> Refresh
-      </button>
-
-      <a href="dashboard.html" class="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold border border-white/10 flex items-center gap-1.5 transition-all">
-        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> App Dashboard
-      </a>
     </div>
   </header>
 
@@ -148,7 +139,7 @@
 
       <div class="glass-card p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:border-amber-500/30 transition-all">
         <div>
-          <p class="text-xs text-slate-400 font-medium mb-1 uppercase tracking-wider">Wallet Credits</p>
+          <p class="text-xs text-slate-400 font-medium mb-1 uppercase tracking-wider">Total Revenue (Wallet)</p>
           <h3 class="text-2xl sm:text-3xl font-black text-amber-400">Rs. <span id="statTotalCredits">0.00</span></h3>
         </div>
         <div class="p-3.5 bg-amber-500/15 text-amber-400 rounded-xl group-hover:scale-110 transition-transform">
@@ -167,58 +158,6 @@
       </div>
     </div>
 
-    <!-- Cloudflare Security & Bot Shield Control Center -->
-    <div class="glass-card rounded-2xl p-5 border border-cyan-500/20 shadow-xl bg-gradient-to-r from-slate-900/90 via-[#0e1628]/90 to-slate-900/90">
-      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-        <div class="flex items-center gap-3">
-          <div class="p-3 bg-cyan-500/20 text-cyan-400 rounded-2xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-            <i data-lucide="shield-check" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-base font-extrabold text-white">Cloudflare Turnstile & Bot Protection</h2>
-              <span id="turnstileActiveBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-0.5">Control bot verification on login/signup, switch between interactive and easy-pass mode</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
-          <button type="button" onclick="saveSecuritySettings()" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-600/25 flex items-center gap-2 transition-all active:scale-95">
-            <i data-lucide="check-circle" class="w-4 h-4"></i> Save Security Settings
-          </button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-        <!-- 1. Enable/Disable Toggle -->
-        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
-          <div>
-            <label class="text-xs font-bold text-white block">Turnstile Verification</label>
-            <span class="text-[11px] text-slate-400">Require human check on login/signup</span>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="cfgTurnstileEnabled" class="sr-only peer" checked onchange="updateTurnstileBadge()">
-            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
-          </label>
-        </div>
-
-        <!-- 2. Security Mode -->
-        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-          <label class="text-xs font-bold text-white block mb-1.5">Verification Mode</label>
-          <select id="cfgTurnstileMode" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
-            <option value="interactive">Interactive Challenge (Tick Box Verification)</option>
-            <option value="easy">Easy Pass Mode (Instant pass on tick without Cloudflare blocks)</option>
-          </select>
-        </div>
-
-        <!-- 3. Site Key -->
-        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-          <label class="text-xs font-bold text-white block mb-1.5">Cloudflare Site Key</label>
-          <input type="text" id="cfgTurnstileSiteKey" value="0x4AAAAAAFTt3WlfzARJ26K-" placeholder="Site Key" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-cyan-500" />
-        </div>
-      </div>
-    </div>
 
     <!-- Users Management Card -->
     <div class="glass-card rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
@@ -489,18 +428,22 @@
       try {
         const res = await fetch(`/api/status?_t=${Date.now()}`);
         if (res.ok) {
-          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-          text.textContent = 'Server Online';
-          text.className = 'text-emerald-400 font-semibold';
-          banner.classList.add('hidden');
+          if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          if (text) {
+            text.textContent = 'Server Online';
+            text.className = 'text-emerald-400 font-semibold';
+          }
+          if (banner) banner.classList.add('hidden');
           return true;
         }
       } catch (e) {}
 
-      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-      text.textContent = 'Server Offline';
-      text.className = 'text-amber-400 font-semibold';
-      banner.classList.remove('hidden');
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      if (text) {
+        text.textContent = 'Server Offline';
+        text.className = 'text-amber-400 font-semibold';
+      }
+      if (banner) banner.classList.remove('hidden');
       return false;
     }
 
@@ -615,8 +558,27 @@
       document.getElementById('statTotalUsers').innerText = allUsers.length;
       const srts = allUsers.reduce((sum, u) => sum + (u.srt_count || 0), 0);
       document.getElementById('statTotalSrts').innerText = srts;
-      const credits = allUsers.reduce((sum, u) => sum + (u.balance || 0), 0);
-      document.getElementById('statTotalCredits').innerText = credits.toFixed(2);
+
+      // Calculate total collected user payments (all revenue paid into wallet)
+      let totalCollected = 0;
+      allUsers.forEach(u => {
+        let userPaid = 0;
+        if (Array.isArray(u.payments) && u.payments.length > 0) {
+          userPaid = u.payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+        }
+        // Account for current balance if higher (e.g. manual topup / initial balance)
+        userPaid = Math.max(userPaid, parseFloat(u.balance) || 0);
+        totalCollected += userPaid;
+      });
+
+      const formattedTotal = totalCollected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      const headerTotalEl = document.getElementById('headerTotalEarnings');
+      if (headerTotalEl) headerTotalEl.innerText = formattedTotal;
+
+      const statCreditsEl = document.getElementById('statTotalCredits');
+      if (statCreditsEl) statCreditsEl.innerText = formattedTotal;
+
       const subs = allUsers.filter(u => u.subscription_type === 'creator' || u.subscription_type === 'pro').length;
       document.getElementById('statTotalSubs').innerText = subs;
     }
@@ -937,68 +899,9 @@
       fetchUsers();
     }
 
-    // --- Cloudflare Turnstile Settings Controller ---
-    async function loadSecuritySettings() {
-      try {
-        const res = await fetch('/api/admin/security-config');
-        if (res.ok) {
-          const data = await res.json();
-          if (document.getElementById('cfgTurnstileEnabled')) {
-            document.getElementById('cfgTurnstileEnabled').checked = data.turnstile_enabled !== false;
-          }
-          if (document.getElementById('cfgTurnstileMode') && data.turnstile_mode) {
-            document.getElementById('cfgTurnstileMode').value = data.turnstile_mode;
-          }
-          if (document.getElementById('cfgTurnstileSiteKey') && data.turnstile_site_key) {
-            document.getElementById('cfgTurnstileSiteKey').value = data.turnstile_site_key;
-          }
-          updateTurnstileBadge();
-        }
-      } catch(e) {}
-    }
-
-    function updateTurnstileBadge() {
-      const el = document.getElementById('cfgTurnstileEnabled');
-      const badge = document.getElementById('turnstileActiveBadge');
-      if (!badge || !el) return;
-      if (el.checked) {
-        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-        badge.textContent = "Active";
-      } else {
-        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
-        badge.textContent = "Disabled";
-      }
-    }
-
-    async function saveSecuritySettings() {
-      const enabled = document.getElementById('cfgTurnstileEnabled')?.checked;
-      const mode = document.getElementById('cfgTurnstileMode')?.value || 'interactive';
-      const siteKey = document.getElementById('cfgTurnstileSiteKey')?.value.trim() || '0x4AAAAAAFTt3WlfzARJ26K-';
-      try {
-        const res = await fetch('/api/admin/security-config', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            turnstile_enabled: enabled,
-            turnstile_mode: mode,
-            turnstile_site_key: siteKey
-          })
-        });
-        if (res.ok) {
-          showToast('Turnstile security settings saved successfully!', 'success');
-          updateTurnstileBadge();
-        } else {
-          showToast('Failed to save security settings', 'warning');
-        }
-      } catch(e) {
-        showToast('Error saving settings: ' + e.message, 'error');
-      }
-    }
-
     // Auto-init on page load
     window.addEventListener('DOMContentLoaded', () => {
       fetchUsers();
-      loadSecuritySettings();
       // Periodically check server health
       setInterval(checkServerHealth, 20000);
 
