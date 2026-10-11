@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <script>
+  (function(){
+    var h=(window.location.hostname||"").toLowerCase();
+    var p=window.location.protocol;
+    var d=atob("Y2Fwem9uZS50b3A=");
+    var ok=(h==="localhost"||h==="127.0.0.1"||h===d||(h.length>d.length&&h.slice(-d.length-1)==="."+d)||h==="capzone.kaveez.top");
+    if(p==="file:"||!ok){
+      try{if(window.stop)window.stop();}catch(e){}
+      try{document.documentElement.innerHTML="";if(document.head)document.head.innerHTML="";if(document.body)document.body.innerHTML="";}catch(e){}
+      document.write("");
+      return;
+    }
+    document.addEventListener("contextmenu",function(e){e.preventDefault();return false;},{passive:false});
+    document.addEventListener("keydown",function(e){
+      if(e.key==="F12"||(e.ctrlKey&&e.shiftKey&&["I","i","J","j","C","c"].includes(e.key))||(e.ctrlKey&&["u","U","s","S"].includes(e.key))){
+        e.preventDefault();e.stopPropagation();return false;
+      }
+    },true);
+    if(h!=="localhost"&&h!=="127.0.0.1"){
+      var noop=function(){};
+      window.console.log=noop;window.console.warn=noop;window.console.info=noop;window.console.debug=noop;window.console.error=noop;
+    }
+    setInterval(function(){
+      var s=Date.now();
+      (function(){}).constructor("debugger")();
+      if(Date.now()-s>100){try{window.console.clear();}catch(e){}}
+    },1800);
+  })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SRT Admin Dashboard | CapZone</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { background-color: #0b0f19; color: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(18, 24, 38, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-header { background: rgba(11, 15, 25, 0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#10b981',
+            accent: '#8b5cf6'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-[#0b0f19] relative overflow-x-hidden">
+  
+  <!-- Ambient Glow Effects -->
+  <div class="fixed top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none"></div>
+  <div class="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="glass-header sticky top-0 z-40 px-4 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-3 shadow-xl">
+    <div class="flex items-center gap-3">
+      <div class="p-2.5 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
+        <i data-lucide="shield" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h1 class="text-lg sm:text-xl font-black tracking-tight flex items-center gap-2">
+          CapZone <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">SRT ADMIN</span>
+        </h1>
+        <p class="text-[11px] text-slate-400">User & Quota Control Center</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center flex-wrap gap-2.5">
+      <!-- Live Server Status Indicator -->
+      <div id="serverStatusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 bg-slate-800/80 border border-slate-700 text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="serverStatusDot"></span>
+        <span id="serverStatusText">Connecting...</span>
+      </div>
+
+      <!-- Add User Button -->
+      <button onclick="openCreateUserModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 flex items-center gap-1.5 transition-all transform active:scale-95">
+        <i data-lucide="user-plus" class="w-4 h-4"></i> Add User
+      </button>
+
+      <!-- Refresh Button -->
+      <button onclick="fetchUsers()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all transform active:scale-95">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i> Refresh
+      </button>
+
+      <a href="dashboard.html" class="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold border border-white/10 flex items-center gap-1.5 transition-all">
+        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> App Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Server Down Alert Banner (In-page notification) -->
+  <div id="serverAlertBanner" class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 hidden">
+    <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-red-300">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-red-500/20 rounded-xl text-red-400">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-white">Backend Node Server is Offline</p>
+          <p class="text-xs text-red-300">Unable to reach <code class="bg-black/30 px-1.5 py-0.5 rounded text-red-200" id="currentApiUrlText">Backend Service</code>. Make sure the Node server is running.</p>
+        </div>
+      </div>
+      <button onclick="fetchUsers()" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold shadow-lg transition-all flex items-center gap-1.5 shrink-0">
+        <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Retry Connection
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div class="glass-card p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div>
+          <p class="text-xs text-slate-400 font-medium mb-1 uppercase tracking-wider">Total Users</p>
+          <h3 class="text-2xl sm:text-3xl font-black text-white" id="statTotalUsers">0</h3>
+        </div>
+        <div class="p-3.5 bg-blue-500/15 text-blue-400 rounded-xl group-hover:scale-110 transition-transform">
+          <i data-lucide="users" class="w-6 h-6"></i>
+        </div>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+        <div>
+          <p class="text-xs text-slate-400 font-medium mb-1 uppercase tracking-wider">SRTs Generated</p>
+          <h3 class="text-2xl sm:text-3xl font-black text-emerald-400" id="statTotalSrts">0</h3>
+        </div>
+        <div class="p-3.5 bg-emerald-500/15 text-emerald-400 rounded-xl group-hover:scale-110 transition-transform">
+          <i data-lucide="file-video" class="w-6 h-6"></i>
+        </div>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:border-amber-500/30 transition-all">
+        <div>
+          <p class="text-xs text-slate-400 font-medium mb-1 uppercase tracking-wider">Wallet Credits</p>
+          <h3 class="text-2xl sm:text-3xl font-black text-amber-400">Rs. <span id="statTotalCredits">0.00</span></h3>
+        </div>
+        <div class="p-3.5 bg-amber-500/15 text-amber-400 rounded-xl group-hover:scale-110 transition-transform">
+          <i data-lucide="wallet" class="w-6 h-6"></i>
+        </div>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:border-purple-500/30 transition-all">
+        <div>
+          <p class="text-xs text-slate-400 font-medium mb-1 uppercase tracking-wider">Active Subscribers</p>
+          <h3 class="text-2xl sm:text-3xl font-black text-purple-400" id="statTotalSubs">0</h3>
+        </div>
+        <div class="p-3.5 bg-purple-500/15 text-purple-400 rounded-xl group-hover:scale-110 transition-transform">
+          <i data-lucide="zap" class="w-6 h-6"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloudflare Security & Bot Shield Control Center -->
+    <div class="glass-card rounded-2xl p-5 border border-cyan-500/20 shadow-xl bg-gradient-to-r from-slate-900/90 via-[#0e1628]/90 to-slate-900/90">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-cyan-500/20 text-cyan-400 rounded-2xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-extrabold text-white">Cloudflare Turnstile & Bot Protection</h2>
+              <span id="turnstileActiveBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Control bot verification on login/signup, switch between interactive and easy-pass mode</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+          <button type="button" onclick="saveSecuritySettings()" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-600/25 flex items-center gap-2 transition-all active:scale-95">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> Save Security Settings
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+        <!-- 1. Enable/Disable Toggle -->
+        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+          <div>
+            <label class="text-xs font-bold text-white block">Turnstile Verification</label>
+            <span class="text-[11px] text-slate-400">Require human check on login/signup</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="cfgTurnstileEnabled" class="sr-only peer" checked onchange="updateTurnstileBadge()">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+          </label>
+        </div>
+
+        <!-- 2. Security Mode -->
+        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
+          <label class="text-xs font-bold text-white block mb-1.5">Verification Mode</label>
+          <select id="cfgTurnstileMode" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+            <option value="interactive">Interactive Challenge (Tick Box Verification)</option>
+            <option value="easy">Easy Pass Mode (Instant pass on tick without Cloudflare blocks)</option>
+          </select>
+        </div>
+
+        <!-- 3. Site Key -->
+        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
+          <label class="text-xs font-bold text-white block mb-1.5">Cloudflare Site Key</label>
+          <input type="text" id="cfgTurnstileSiteKey" value="0x4AAAAAAFTt3WlfzARJ26K-" placeholder="Site Key" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-cyan-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Management Card -->
+    <div class="glass-card rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+      
+      <!-- Toolbar -->
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+        <div class="flex items-center gap-2">
+          <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-primary"></i> User Management
+          </h2>
+          <span id="filteredCountBadge" class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono">0 users</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full md:w-auto mt-3 md:mt-0">
+          <!-- Search Box -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="searchInput" placeholder="Search by email..." onkeyup="filterUsers()"
+              class="w-full pl-9 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors" />
+          </div>
+
+          <!-- Status Filter -->
+          <select id="statusFilter" onchange="filterUsers()"
+            class="w-full sm:w-auto px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 transition-colors">
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="deactivated">Deactivated Only</option>
+          </select>
+
+          <!-- Plan Filter -->
+          <select id="planFilter" onchange="filterUsers()"
+            class="w-full sm:w-auto px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 transition-colors">
+            <option value="all">All Plans</option>
+            <option value="payg">Pay As You Go</option>
+            <option value="creator">Creator Plan (120m)</option>
+            <option value="pro">Pro Plan (300m)</option>
+            <option value="none">None (Own API)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="overflow-x-auto w-full">
+        <table class="w-full text-left border-collapse min-w-[750px]">
+          <thead>
+            <tr class="bg-slate-900/60 text-slate-400 text-[11px] font-bold uppercase tracking-wider border-b border-slate-800">
+              <th class="py-3 px-4">User Email</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4">Wallet Balance</th>
+              <th class="py-3 px-4">Subscription</th>
+              <th class="py-3 px-4">Remaining Quota</th>
+              <th class="py-3 px-4">SRT Videos</th>
+              <th class="py-3 px-4">Joined</th>
+              <th class="py-3 px-4 text-center">Admin Controls</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody" class="divide-y divide-slate-800/50 text-xs">
+            <!-- Dynamic User Rows -->
+            <tr>
+              <td colspan="8" class="text-center py-12 text-slate-400">
+                <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-primary"></i>
+                <p>Loading user database...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- EDIT / MANAGE USER MODAL -->
+  <div id="editModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm items-center justify-center p-4 hidden">
+    <div class="glass-card w-full max-w-lg rounded-2xl p-6 relative border border-slate-700 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2.5 bg-blue-500/20 text-blue-400 rounded-xl">
+          <i data-lucide="user-cog" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Manage User Account</h3>
+          <p id="editUserEmail" class="text-xs text-blue-400 font-mono"></p>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Account Status</label>
+            <select id="editStatus" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-primary">
+              <option value="true">Active (Allowed to generate)</option>
+              <option value="false">Deactivated (Blocked / Banned)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Subscription Plan</label>
+            <select id="editSub" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-primary">
+              <option value="none">None (Free only with Own API Key)</option>
+              <option value="payg">Pay As You Go (Per-Video Balance)</option>
+              <option value="creator">Creator (Rs. 2,500/mo - 120 mins)</option>
+              <option value="pro">Pro (Rs. 5,000/mo - 300 mins)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Quota Management -->
+        <div class="grid grid-cols-2 gap-3 bg-slate-900/40 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Quota Used (Mins)</label>
+            <input type="number" id="editQuotaUsed" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Quota Limit (Mins)</label>
+            <input type="number" id="editQuotaLimit" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary" />
+          </div>
+          <div class="col-span-2 flex justify-between items-center pt-1">
+            <span class="text-[10px] text-slate-400">⚡ Auto-fills 120m for Creator, 300m for Pro</span>
+            <button type="button" onclick="document.getElementById('editQuotaUsed').value = '0'" class="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1 font-semibold">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset Quota to 0 Mins
+            </button>
+          </div>
+        </div>
+
+        <!-- Wallet Balance Management -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-slate-300">Wallet Balance (LKR)</label>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="quickAddToEditBalance(100)" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold transition-colors">+100</button>
+              <button type="button" onclick="quickAddToEditBalance(250)" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold transition-colors">+250</button>
+              <button type="button" onclick="quickAddToEditBalance(500)" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold transition-colors">+500</button>
+              <button type="button" onclick="document.getElementById('editBalance').value = '0.00'" class="px-2 py-0.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[10px] font-bold transition-colors">Clear</button>
+            </div>
+          </div>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
+            <input type="number" id="editBalance" step="0.01" class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white font-mono font-bold focus:outline-none focus:border-primary" />
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center gap-3 pt-2">
+          <button onclick="saveUser()" class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-600/20 transition-all flex justify-center items-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i> Save Changes
+          </button>
+          <button onclick="closeModal()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD NEW USER MODAL -->
+  <div id="createUserModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm items-center justify-center p-4 hidden">
+    <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeCreateUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl">
+          <i data-lucide="user-plus" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Add New User</h3>
+          <p class="text-xs text-slate-400">Register or credit an account</p>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">User Email Address *</label>
+          <input type="email" id="newEmail" placeholder="user@gmail.com" required
+            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Initial Balance (Rs.)</label>
+          <input type="number" id="newBalance" value="250" step="10"
+            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Subscription Plan</label>
+          <select id="newSub" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <option value="none">None (Free only with Own API Key)</option>
+            <option value="payg" selected>Pay As You Go (Per-Video Balance)</option>
+            <option value="creator">Creator Plan (120 Mins / Month)</option>
+            <option value="pro">Pro Plan (300 Mins / Month)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button onclick="submitNewUser()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex justify-center items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Create User
+          </button>
+          <button onclick="closeCreateUserModal()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-[999] flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    const API_BASE_URL = (function() {
+      const proto = window.location.protocol;
+      const host = window.location.hostname || '';
+      const port = window.location.port || '';
+      if ((host === 'localhost' || host === '127.0.0.1') && port === '6039') return '';
+      if (proto === 'file:' || host === 'localhost' || host === '127.0.0.1' || !host) return 'http://localhost:6039';
+      if (host.includes('capzone.top') || host.includes('web.app')) return 'https://capzone.kaveez.top';
+      return '';
+    })();
+
+    // Direct API Post
+    async function apiPost(endpoint, payload) {
+      try {
+        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (e) {
+        console.warn('API Post notice:', e.message);
+      }
+      return null;
+    }
+
+    let allUsers = [];
+    let currentEditEmail = '';
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-emerald-600/90 text-white border-emerald-400/30',
+        error: 'bg-red-600/90 text-white border-red-400/30',
+        warning: 'bg-amber-600/90 text-white border-amber-400/30',
+        info: 'bg-blue-600/90 text-white border-blue-400/30'
+      };
+      toast.className = `px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold backdrop-blur border flex items-center gap-2 transform transition-all pointer-events-auto ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    async function checkServerHealth() {
+      const dot = document.getElementById('serverStatusDot');
+      const text = document.getElementById('serverStatusText');
+      const banner = document.getElementById('serverAlertBanner');
+      const urlText = document.getElementById('currentApiUrlText');
+      if (urlText) urlText.textContent = 'Backend Service';
+
+      try {
+        const res = await fetch(`/api/status?_t=${Date.now()}`);
+        if (res.ok) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          text.textContent = 'Server Online';
+          text.className = 'text-emerald-400 font-semibold';
+          banner.classList.add('hidden');
+          return true;
+        }
+      } catch (e) {}
+
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      text.textContent = 'Server Offline';
+      text.className = 'text-amber-400 font-semibold';
+      banner.classList.remove('hidden');
+      return false;
+    }
+
+    // Helper: Broadcast user update in Real-Time to Dashboard and across tabs
+    function broadcastUserUpdate(email, updatedUser) {
+      email = (email || '').toLowerCase().trim();
+      if (!email || !updatedUser) return;
+      
+      // 1. Update in-memory user list
+      const idx = allUsers.findIndex(u => (u.email || '').toLowerCase() === email);
+      if (idx !== -1) {
+        allUsers[idx] = { ...allUsers[idx], ...updatedUser };
+      } else {
+        allUsers.push(updatedUser);
+      }
+      localStorage.setItem('capzone_admin_cached_users', JSON.stringify(allUsers));
+
+      // 2. BroadcastChannel: 0ms real-time tab sync
+      try {
+        const bc = new BroadcastChannel('capzone_realtime_sync');
+        bc.postMessage({ type: 'USER_UPDATED', email: email, user: updatedUser });
+      } catch (e) {}
+
+      // 3. Storage events: triggers 'storage' listener in Dashboard
+      localStorage.setItem('capzone_admin_sync', JSON.stringify({ email: email, timestamp: Date.now(), user: updatedUser }));
+      localStorage.setItem('capzone_cached_user_' + email, JSON.stringify(updatedUser));
+      
+      // If updating currently logged in user, also update primary cache
+      const curUser = (localStorage.getItem('capzone_user_email') || '').toLowerCase().trim();
+      if (curUser === email) {
+        localStorage.setItem('capzone_user_profile', JSON.stringify(updatedUser));
+      }
+    }
+
+    async function fetchUsers() {
+      const refreshIcon = document.getElementById('refreshIcon');
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+      await checkServerHealth();
+      
+      let users = null;
+      try {
+        const res = await fetch(`/api/admin/srt-users?_t=${Date.now()}`);
+        if (res.ok) {
+          users = await res.json();
+        }
+      } catch (err) {}
+
+      if (users && Array.isArray(users)) {
+        allUsers = users;
+        localStorage.setItem('capzone_admin_cached_users', JSON.stringify(allUsers));
+        renderTable();
+        updateStats();
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+        return;
+      }
+
+      if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+
+      // Fallback: check cached users from localStorage (useful for VS Code / offline test)
+      const cached = localStorage.getItem('capzone_admin_cached_users');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            allUsers = parsed;
+            renderTable();
+            updateStats();
+            return;
+          }
+        } catch(e){}
+      }
+
+      // Default seed user if completely empty
+      if (!allUsers || allUsers.length === 0) {
+        allUsers = [{
+          email: 'kaveeshatd@gmail.com',
+          balance: 2500.01,
+          srt_count: 0,
+          active: true,
+          subscription_type: 'creator',
+          quota_used: 0,
+          quota_limit: 120,
+          joined: new Date().toISOString()
+        }];
+        localStorage.setItem('capzone_admin_cached_users', JSON.stringify(allUsers));
+        renderTable();
+        updateStats();
+      }
+    }
+
+    function renderOfflineState() {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-10 text-slate-400">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="wifi-off" class="w-6 h-6"></i>
+            </div>
+            <p class="font-bold text-white text-sm">Cannot Connect to Node Backend</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Make sure <code class="text-blue-400">node server.js</code> is running on port 6039.</p>
+            <button onclick="fetchUsers()" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all">
+              Try Reconnecting
+            </button>
+          </td>
+        </tr>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateStats() {
+      document.getElementById('statTotalUsers').innerText = allUsers.length;
+      const srts = allUsers.reduce((sum, u) => sum + (u.srt_count || 0), 0);
+      document.getElementById('statTotalSrts').innerText = srts;
+      const credits = allUsers.reduce((sum, u) => sum + (u.balance || 0), 0);
+      document.getElementById('statTotalCredits').innerText = credits.toFixed(2);
+      const subs = allUsers.filter(u => u.subscription_type === 'creator' || u.subscription_type === 'pro').length;
+      document.getElementById('statTotalSubs').innerText = subs;
+    }
+
+    function filterUsers() {
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('usersTableBody');
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const planFilter = document.getElementById('planFilter').value;
+      
+      tbody.innerHTML = '';
+      
+      const filtered = allUsers.filter(u => {
+        const matchesQuery = !query || u.email.toLowerCase().includes(query);
+        const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? u.active : !u.active);
+        const matchesPlan = planFilter === 'all' || (u.subscription_type || 'none') === planFilter;
+        return matchesQuery && matchesStatus && matchesPlan;
+      });
+
+      document.getElementById('filteredCountBadge').innerText = `${filtered.length} of ${allUsers.length} users`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-12 text-slate-400">
+              <i data-lucide="user-x" class="w-8 h-8 text-slate-500 mx-auto mb-2"></i>
+              <p class="font-bold text-slate-300">No users found</p>
+              <p class="text-xs text-slate-500 mt-0.5">Try adjusting your search or filters.</p>
+            </td>
+          </tr>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      
+      filtered.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition-colors border-b border-slate-800/60';
+        
+        const statusBadge = user.active 
+          ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[11px] font-bold rounded-full border border-emerald-500/20 inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Active</span>`
+          : `<span class="px-2.5 py-1 bg-red-500/10 text-red-400 text-[11px] font-bold rounded-full border border-red-500/20 inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Deactivated</span>`;
+
+        const subType = user.subscription_type || 'none';
+        let subBadge = '';
+        if (subType === 'creator') {
+          subBadge = `<span class="px-2 py-0.5 bg-blue-500/15 text-blue-300 text-[10px] font-black rounded-lg border border-blue-500/30 uppercase tracking-wide">Creator</span>`;
+        } else if (subType === 'pro') {
+          subBadge = `<span class="px-2 py-0.5 bg-purple-500/15 text-purple-300 text-[10px] font-black rounded-lg border border-purple-500/30 uppercase tracking-wide">Pro</span>`;
+        } else if (subType === 'payg') {
+          subBadge = `<span class="px-2 py-0.5 bg-amber-500/15 text-amber-300 text-[10px] font-black rounded-lg border border-amber-500/30 uppercase tracking-wide">Pay As You Go</span>`;
+        } else {
+          subBadge = `<span class="px-2 py-0.5 bg-slate-700/50 text-slate-400 text-[10px] font-bold rounded-lg border border-slate-700">None (Own API)</span>`;
+        }
+
+        const remaining = Math.max(0, (user.quota_limit || 0) - (user.quota_used || 0));
+        let quotaText = '';
+        if (subType === 'creator' || subType === 'pro') {
+          quotaText = `<div class="font-mono text-xs"><span class="text-white font-bold">${remaining}m</span> <span class="text-slate-400">/ ${user.quota_limit || 0}m left</span></div>`;
+        } else if (subType === 'payg') {
+          quotaText = `<span class="text-emerald-400 text-xs font-semibold">Wallet Billing</span>`;
+        } else {
+          quotaText = `<span class="text-slate-500 text-xs">Free (Own API Key)</span>`;
+        }
+
+        const joinDate = user.joined ? new Date(user.joined).toLocaleDateString() : 'N/A';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+                ${user.email ? user.email.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div class="font-semibold text-white truncate max-w-[200px]" title="${user.email}">${user.email}</div>
+            </div>
+          </td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-2">
+              <span class="font-bold font-mono text-amber-400 text-xs">Rs. ${(user.balance || 0).toFixed(2)}</span>
+              <button onclick="quickTopUp('${user.email}', 100)" title="Quick +Rs. 100" class="px-1.5 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold transition-colors">+100</button>
+              <button onclick="quickTopUp('${user.email}', 250)" title="Quick +Rs. 250" class="px-1.5 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold transition-colors">+250</button>
+            </div>
+          </td>
+          <td class="py-3 px-4">${subBadge}</td>
+          <td class="py-3 px-4">${quotaText}</td>
+          <td class="py-3 px-4 text-slate-300 font-semibold">${user.srt_count || 0}</td>
+          <td class="py-3 px-4 text-slate-400 text-[11px]">${joinDate}</td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <!-- Manage Button (ALWAYS VISIBLE) -->
+              <button onclick="openEdit('${user.email}')" class="px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 hover:text-white rounded-lg text-xs font-bold border border-blue-500/30 transition-all flex items-center gap-1 shadow-sm">
+                <i data-lucide="sliders" class="w-3 h-3"></i> Manage
+              </button>
+
+              <!-- Quick Status Toggle Button -->
+              <button onclick="toggleUserStatus('${user.email}', ${!user.active})" title="${user.active ? 'Deactivate User' : 'Activate User'}" class="p-1 rounded-lg ${user.active ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'} transition-all">
+                <i data-lucide="${user.active ? 'user-x' : 'user-check'}" class="w-3.5 h-3.5"></i>
+              </button>
+
+              <!-- Delete User Button -->
+              <button onclick="confirmDeleteUser('${user.email}')" title="Delete User" class="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function quickAddToEditBalance(amount) {
+      const el = document.getElementById('editBalance');
+      const cur = parseFloat(el.value || 0);
+      el.value = (cur + amount).toFixed(2);
+    }
+
+    async function quickTopUp(email, amount) {
+      email = (email || '').toLowerCase().trim();
+      const user = allUsers.find(u => (u.email || '').toLowerCase() === email);
+      if (!user) return;
+      const newBal = (user.balance || 0) + amount;
+      let updatedUser = { ...user, balance: newBal };
+
+      try {
+        const data = await apiPost('/api/admin/srt-update-user', { email: email, updates: { balance: newBal } });
+        if (data && data.success && data.user) {
+          updatedUser = data.user;
+        }
+      } catch (err) {
+        console.warn('Backend update error, updating local state:', err);
+      }
+
+      broadcastUserUpdate(email, updatedUser);
+      showToast(`+Rs. ${amount} added to ${email}`, 'success');
+      renderTable();
+      updateStats();
+      fetchUsers();
+    }
+
+    async function toggleUserStatus(email, newStatus) {
+      email = (email || '').toLowerCase().trim();
+      const user = allUsers.find(u => (u.email || '').toLowerCase() === email);
+      let updatedUser = user ? { ...user, active: newStatus } : { email: email, active: newStatus };
+
+      try {
+        const data = await apiPost('/api/admin/srt-update-user', { email: email, updates: { active: newStatus } });
+        if (data && data.success && data.user) {
+          updatedUser = data.user;
+        }
+      } catch (err) {
+        console.warn('Backend update error, updating local state:', err);
+      }
+
+      broadcastUserUpdate(email, updatedUser);
+      showToast(`User is now ${newStatus ? 'Active' : 'Deactivated'}`, 'success');
+      renderTable();
+      updateStats();
+      fetchUsers();
+    }
+
+    async function confirmDeleteUser(email) {
+      email = (email || '').toLowerCase().trim();
+      if (!confirm(`Are you sure you want to permanently delete user:\n${email}?`)) return;
+      try {
+        await apiPost('/api/admin/srt-delete-user', { email: email });
+      } catch (err) {
+        console.warn('Backend delete error:', err);
+      }
+
+      allUsers = allUsers.filter(u => (u.email || '').toLowerCase() !== email);
+      localStorage.setItem('capzone_admin_cached_users', JSON.stringify(allUsers));
+      try {
+        const bc = new BroadcastChannel('capzone_realtime_sync');
+        bc.postMessage({ type: 'USER_DELETED', email: email });
+      } catch(e) {}
+      localStorage.setItem('capzone_admin_sync', JSON.stringify({ email: email, timestamp: Date.now(), deleted: true }));
+
+      showToast(`User ${email} deleted`, 'success');
+      renderTable();
+      updateStats();
+      fetchUsers();
+    }
+
+    function openEdit(email) {
+      email = (email || '').toLowerCase().trim();
+      const user = allUsers.find(u => (u.email || '').toLowerCase() === email);
+      if (!user) return;
+      currentEditEmail = email;
+      document.getElementById('editUserEmail').innerText = email;
+      document.getElementById('editStatus').value = user.active ? 'true' : 'false';
+      document.getElementById('editBalance').value = (user.balance || 0).toFixed(2);
+      document.getElementById('editSub').value = user.subscription_type || 'none';
+      document.getElementById('editQuotaUsed').value = user.quota_used || 0;
+      document.getElementById('editQuotaLimit').value = user.quota_limit || 0;
+      
+      const modal = document.getElementById('editModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('editModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function saveUser() {
+      const email = (currentEditEmail || '').toLowerCase().trim();
+      const active = document.getElementById('editStatus').value === 'true';
+      const balance = parseFloat(document.getElementById('editBalance').value) || 0;
+      const subscription_type = document.getElementById('editSub').value;
+      const quota_used = parseInt(document.getElementById('editQuotaUsed').value) || 0;
+      const quota_limit = parseInt(document.getElementById('editQuotaLimit').value) || 0;
+      
+      const existingUser = allUsers.find(u => (u.email || '').toLowerCase() === email) || {};
+      let updatedUser = { 
+        ...existingUser,
+        email: email, 
+        active: active, 
+        balance: balance, 
+        subscription_type: subscription_type, 
+        quota_used: quota_used, 
+        quota_limit: quota_limit 
+      };
+
+      try {
+        const data = await apiPost('/api/admin/srt-update-user', { 
+          email: email, 
+          updates: { active, balance, subscription_type, quota_used, quota_limit } 
+        });
+        if (data && data.success && data.user) {
+          updatedUser = data.user;
+        }
+      } catch (err) {
+        console.warn('Backend save error, updating local state:', err);
+      }
+
+      broadcastUserUpdate(email, updatedUser);
+      closeModal();
+      showToast('User settings saved successfully!', 'success');
+      renderTable();
+      updateStats();
+      fetchUsers();
+    }
+
+    function openCreateUserModal() {
+      document.getElementById('newEmail').value = '';
+      document.getElementById('newBalance').value = '250';
+      document.getElementById('newSub').value = 'payg';
+      const modal = document.getElementById('createUserModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeCreateUserModal() {
+      const modal = document.getElementById('createUserModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function submitNewUser() {
+      const email = document.getElementById('newEmail').value.trim().toLowerCase();
+      const balance = parseFloat(document.getElementById('newBalance').value) || 0;
+      const sub = document.getElementById('newSub').value;
+
+      if (!email || !email.includes('@')) {
+        showToast('Please enter a valid email address', 'warning');
+        return;
+      }
+
+      let quota_limit = 0;
+      if (sub === 'creator') quota_limit = 120;
+      if (sub === 'pro') quota_limit = 300;
+
+      let newUser = {
+        email: email,
+        balance: balance,
+        subscription_type: sub,
+        quota_limit: quota_limit,
+        quota_used: 0,
+        active: true,
+        srt_count: 0,
+        joined: new Date().toISOString()
+      };
+
+      try {
+        const data = await apiPost('/api/admin/srt-create-user', {
+          email: email,
+          updates: {
+            balance: balance,
+            subscription_type: sub,
+            quota_limit: quota_limit,
+            quota_used: 0,
+            active: true
+          }
+        });
+        if (data && data.success && data.user) {
+          newUser = data.user;
+        }
+      } catch (err) {
+        console.warn('Backend create user error, saving locally:', err);
+      }
+
+      broadcastUserUpdate(email, newUser);
+      closeCreateUserModal();
+      showToast(`User ${email} created successfully!`, 'success');
+      renderTable();
+      updateStats();
+      fetchUsers();
+    }
+
+    // --- Cloudflare Turnstile Settings Controller ---
+    async function loadSecuritySettings() {
+      try {
+        const res = await fetch('/api/admin/security-config');
+        if (res.ok) {
+          const data = await res.json();
+          if (document.getElementById('cfgTurnstileEnabled')) {
+            document.getElementById('cfgTurnstileEnabled').checked = data.turnstile_enabled !== false;
+          }
+          if (document.getElementById('cfgTurnstileMode') && data.turnstile_mode) {
+            document.getElementById('cfgTurnstileMode').value = data.turnstile_mode;
+          }
+          if (document.getElementById('cfgTurnstileSiteKey') && data.turnstile_site_key) {
+            document.getElementById('cfgTurnstileSiteKey').value = data.turnstile_site_key;
+          }
+          updateTurnstileBadge();
+        }
+      } catch(e) {}
+    }
+
+    function updateTurnstileBadge() {
+      const el = document.getElementById('cfgTurnstileEnabled');
+      const badge = document.getElementById('turnstileActiveBadge');
+      if (!badge || !el) return;
+      if (el.checked) {
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.textContent = "Active";
+      } else {
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        badge.textContent = "Disabled";
+      }
+    }
+
+    async function saveSecuritySettings() {
+      const enabled = document.getElementById('cfgTurnstileEnabled')?.checked;
+      const mode = document.getElementById('cfgTurnstileMode')?.value || 'interactive';
+      const siteKey = document.getElementById('cfgTurnstileSiteKey')?.value.trim() || '0x4AAAAAAFTt3WlfzARJ26K-';
+      try {
+        const res = await fetch('/api/admin/security-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            turnstile_enabled: enabled,
+            turnstile_mode: mode,
+            turnstile_site_key: siteKey
+          })
+        });
+        if (res.ok) {
+          showToast('Turnstile security settings saved successfully!', 'success');
+          updateTurnstileBadge();
+        } else {
+          showToast('Failed to save security settings', 'warning');
+        }
+      } catch(e) {
+        showToast('Error saving settings: ' + e.message, 'error');
+      }
+    }
+
+    // Auto-init on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchUsers();
+      loadSecuritySettings();
+      // Periodically check server health
+      setInterval(checkServerHealth, 20000);
+
+      // 1. Real-time Cross-tab Sync Listener (Instant update when user pays or tests demo)
+      try {
+        const bc = new BroadcastChannel('capzone_realtime_sync');
+        bc.onmessage = (event) => {
+          if (event.data && (event.data.type === 'USER_UPDATED' || event.data.type === 'PAYMENT_COMPLETED')) {
+            showToast(`⚡ Payment Update: ${event.data.email || 'User'} credited (Rs. ${event.data.amount || ''})`, 'success');
+            fetchUsers();
+          }
+        };
+      } catch (e) {}
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'capzone_admin_sync' || e.key === 'capzone_payment_sync' || e.key === 'capzone_balance_update') {
+          fetchUsers();
+        }
+      });
+
+      window.addEventListener('focus', () => {
+        fetchUsers();
+      });
+
+      // Periodically refresh user database every 8 seconds
+      setInterval(fetchUsers, 8000);
+
+      // Auto-populate Quota Limit when Subscription Plan changes in Edit Modal
+      const editSubEl = document.getElementById('editSub');
+      if (editSubEl) {
+        editSubEl.addEventListener('change', (e) => {
+          const plan = e.target.value;
+          const quotaLimitInput = document.getElementById('editQuotaLimit');
+          const quotaUsedInput = document.getElementById('editQuotaUsed');
+          if (plan === 'creator') {
+            quotaLimitInput.value = '120';
+            quotaUsedInput.value = '0';
+          } else if (plan === 'pro') {
+            quotaLimitInput.value = '300';
+            quotaUsedInput.value = '0';
+          } else {
+            quotaLimitInput.value = '0';
+            quotaUsedInput.value = '0';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
