@@ -541,22 +541,11 @@
         } catch(e){}
       }
 
-      // Default seed user if completely empty
-      if (!allUsers || allUsers.length === 0) {
-        allUsers = [{
-          email: 'kaveeshatd@gmail.com',
-          balance: 2500.01,
-          srt_count: 0,
-          active: true,
-          subscription_type: 'creator',
-          quota_used: 0,
-          quota_limit: 120,
-          joined: new Date().toISOString()
-        }];
-        localStorage.setItem('capzone_admin_cached_users', JSON.stringify(allUsers));
-        renderTable();
-        updateStats();
+      if (!allUsers) {
+        allUsers = [];
       }
+      renderTable();
+      updateStats();
     }
 
     function renderOfflineState() {
@@ -789,6 +778,19 @@
 
       allUsers = allUsers.filter(u => (u.email || '').toLowerCase() !== email);
       localStorage.setItem('capzone_admin_cached_users', JSON.stringify(allUsers));
+
+      // Completely wipe any cached profile/plan/projects for this user from localStorage
+      localStorage.removeItem('capzone_cached_user_' + email);
+      localStorage.removeItem('capzone_projects_' + email);
+      localStorage.removeItem('capzone_deleted_keys_' + email);
+      const curUser = (localStorage.getItem('capzone_user_email') || '').toLowerCase().trim();
+      if (curUser === email) {
+        localStorage.removeItem('capzone_user_profile');
+        localStorage.removeItem('capzone_user_email');
+        localStorage.removeItem('capzone_user_name');
+        localStorage.removeItem('capzone_login_timestamp');
+      }
+
       try {
         const bc = new BroadcastChannel('capzone_realtime_sync');
         bc.postMessage({ type: 'USER_DELETED', email: email });
