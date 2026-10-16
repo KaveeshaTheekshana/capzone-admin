@@ -378,34 +378,30 @@
       const proto = window.location.protocol;
       const host = window.location.hostname || '';
       const port = window.location.port || '';
-      if ((host === 'localhost' || host === '127.0.0.1') && port === '6039') return '';
+      if (port === '6039') return '';
       if (proto === 'file:' || host === 'localhost' || host === '127.0.0.1' || !host) return 'http://localhost:6039';
-      if (host.includes('capzone.top') || host.includes('web.app') || host.includes('firebaseapp.com')) return 'https://capzone.kaveez.top';
-      return '';
+      if (host.startsWith('192.168.') || host.startsWith('10.') || host.startsWith('172.')) return `http://${host}:6039`;
+      if (host.includes('capzone.kaveez.top') || host.includes('capzone.top')) return '';
+      return `http://${host}:6039`;
     })();
 
-    // Direct API Post with automatic fallbacks
+    // Direct single base API post (no secondary remote fallbacks)
     async function apiPost(endpoint, payload) {
-      const candidates = [
-        `${API_BASE_URL}${endpoint}`,
-        endpoint,
-        `http://localhost:6039${endpoint}`,
-        `https://capzone.kaveez.top${endpoint}`
-      ];
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'x-capzone-shield': 'live_client'
-            },
-            body: JSON.stringify(payload)
-          });
-          if (res.ok) {
-            return await res.json();
-          }
-        } catch (e) {}
+      const url = `${API_BASE_URL}${endpoint}`;
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-capzone-shield': 'live_client'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (e) {
+        console.warn('apiPost request failed:', url, e);
       }
       return null;
     }
@@ -509,11 +505,7 @@
           users = await res.json();
         }
       } catch (err) {
-        try {
-          const fallback = API_BASE_URL.includes('localhost') ? 'https://capzone.kaveez.top' : 'http://localhost:6039';
-          const res2 = await fetch(`${fallback}/api/admin/srt-users?_t=${Date.now()}`);
-          if (res2.ok) users = await res2.json();
-        } catch(e2) {}
+        console.warn('fetchUsers error from primary server:', err);
       }
 
       if (users && Array.isArray(users)) {
