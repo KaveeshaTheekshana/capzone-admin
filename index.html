@@ -21,15 +21,7 @@
         e.preventDefault();e.stopPropagation();return false;
       }
     },true);
-    if(h!=="localhost"&&h!=="127.0.0.1"){
-      var noop=function(){};
-      window.console.log=noop;window.console.warn=noop;window.console.info=noop;window.console.debug=noop;window.console.error=noop;
-    }
-    setInterval(function(){
-      var s=Date.now();
-      (function(){}).constructor("debugger")();
-      if(Date.now()-s>100){try{window.console.clear();}catch(e){}}
-    },1800);
+    // Admin UI initialized
   })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -835,9 +827,17 @@
       const active = document.getElementById('editStatus').value === 'true';
       const balance = parseFloat(document.getElementById('editBalance').value) || 0;
       const subscription_type = document.getElementById('editSub').value;
-      const quota_used = parseInt(document.getElementById('editQuotaUsed').value) || 0;
-      const quota_limit = parseInt(document.getElementById('editQuotaLimit').value) || 0;
+      let quota_used = parseInt(document.getElementById('editQuotaUsed').value) || 0;
+      let quota_limit = parseInt(document.getElementById('editQuotaLimit').value) || 0;
       
+      if (subscription_type === 'creator' && quota_limit <= 0) {
+        quota_limit = 120;
+      } else if (subscription_type === 'pro' && quota_limit <= 0) {
+        quota_limit = 300;
+      } else if (subscription_type === 'none') {
+        quota_limit = 0;
+      }
+
       const existingUser = allUsers.find(u => (u.email || '').toLowerCase() === email) || {};
       let updatedUser = { 
         ...existingUser,
