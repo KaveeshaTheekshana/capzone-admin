@@ -7,8 +7,9 @@
     var h=(window.location.hostname||"").toLowerCase();
     var p=window.location.protocol;
     var d=atob("Y2Fwem9uZS50b3A=");
-    var ok=(h==="localhost"||h==="127.0.0.1"||h===d||(h.length>d.length&&h.slice(-d.length-1)==="."+d)||h==="capzone.kaveez.top");
-    if(p==="file:"||!ok){
+    var isLocal=(h==="localhost"||h==="127.0.0.1"||h.startsWith("192.168.")||h.startsWith("10.")||h.startsWith("172.")||!h);
+    var ok=(isLocal||h===d||(h.length>d.length&&h.slice(-d.length-1)==="."+d)||h==="capzone.kaveez.top"||h.endsWith(".github.io")||h.includes("github")||h.endsWith(".firebaseapp.com")||h.endsWith(".web.app"));
+    if(p!=="file:"&&!ok){
       try{if(window.stop)window.stop();}catch(e){}
       try{document.documentElement.innerHTML="";if(document.head)document.head.innerHTML="";if(document.body)document.body.innerHTML="";}catch(e){}
       document.write("");
@@ -378,11 +379,21 @@
       const proto = window.location.protocol;
       const host = window.location.hostname || '';
       const port = window.location.port || '';
+
+      // Direct access on live VPS backend:
+      if (host === 'capzone.kaveez.top' || host.endsWith('.capzone.kaveez.top')) return '';
+
+      // Local dev directly on port 6039:
       if (port === '6039') return '';
+
+      // Local offline/dev environment (file://, localhost:5500, etc.):
       if (proto === 'file:' || host === 'localhost' || host === '127.0.0.1' || !host) return 'http://localhost:6039';
+
+      // Local LAN testing (Phone connected to PC on 192.168.x.x):
       if (host.startsWith('192.168.') || host.startsWith('10.') || host.startsWith('172.')) return `http://${host}:6039`;
-      if (host.includes('capzone.kaveez.top') || host.includes('capzone.top')) return '';
-      return `http://${host}:6039`;
+
+      // Hosted on GitHub Pages (*.github.io), Firebase (*.web.app), capzone.top, etc.:
+      return 'https://capzone.kaveez.top';
     })();
 
     // Direct single base API post (no secondary remote fallbacks)
